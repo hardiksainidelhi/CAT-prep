@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Table Sum Game</title>
+  <style>
+    table {
+      border-collapse: collapse;
+    }
+    th, td {
+      border: 1px solid black;
+      padding: 5px;
+      text-align: center;
+    }
+    input[type="number"] {
+      width: 50px;
+    }
+  </style>
+</head>
+<body>
+  <h1>Table Sum Game</h1>
+  <label for="rows">Rows:</label>
+  <input type="number" id="rows" min="1" value="3"><br>
+  <label for="cols">Columns:</label>
+  <input type="number" id="cols" min="1" value="3"><br>
+  <button onclick="generateTable()">Generate Table</button><br>
+  <table id="main-table"></table>
+  <button onclick="submitAnswers()" disabled>Submit Answers</button>
+  <p id="result" style="display: none;"></p>
+  <script>
+    let table, timer, startTime, answers = [];
+
+    function generateTable() {
+      const nRows = document.getElementById('rows').value;
+      const nCols = document.getElementById('cols').value;
+      table = document.getElementById('main-table');
+      table.innerHTML = "";
+
+      for (let i = 0; i <= nRows; i++) {
+        let row = table.insertRow();
+        for (let j = 0; j <= nCols; j++) {
+          let cell = row.insertCell();
+          if (i === 0 && j === 0) {
+            cell.textContent = " ";
+          } else if (i === 0) {
+            cell.textContent = Math.floor(Math.random() * 91) + 10;
+          } else if (j === 0) {
+            cell.textContent = Math.floor(Math.random() * 91) + 10;
+          } else {
+            cell.innerHTML = `<input type="number" class="answer">`;
+          }
+        }
+      }
+
+      setTimeout(() => {
+        startTime = Date.now();
+        document.querySelectorAll('.answer').forEach(input => input.disabled = false);
+        document.querySelector('button[onclick="submitAnswers()"]').disabled = false;
+      }, 1000);
+    }
+
+    function submitAnswers() {
+      clearInterval(timer);
+      document.querySelectorAll('.answer').forEach(input => {
+        answers.push(parseInt(input.value));
+        input.disabled = true;
+      });
+
+      let correctAnswers = 0;
+      for (let i = 1; i <= table.rows.length - 1; i++) {
+        for (let j = 1; j <= table.rows[i].cells.length - 1; j++) {
+          if (answers.shift() === parseInt(table.rows[i].cells[0].textContent) + parseInt(table.rows[0].cells[j].textContent)) {
+            table.rows[i].cells[j].style.backgroundColor = 'lightgreen'
+            correctAnswers++;
+          }
+          else{
+            table.rows[i].cells[j].style.backgroundColor = 'red'
+          }
+        }
+      }
+
+      const totalTime = (Date.now() - startTime) / 1000;
+      const speed = totalTime / correctAnswers;
+      document.getElementById('result').textContent = `Time: ${totalTime.toFixed(2)} seconds, Accuracy: ${(correctAnswers / ((table.rows.length - 1) * (table.rows[1].cells.length - 1))) * 100}%, Speed: ${speed.toFixed(2)} seconds/answer`;
+      document.getElementById('result').style.display = "block";
+    }
+  </script>
